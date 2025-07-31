@@ -2,6 +2,14 @@
 
 import { useStore } from "@/store/use-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export function SessionHistory() {
   const { activities, projects } = useStore();
@@ -24,25 +32,34 @@ export function SessionHistory() {
         <CardTitle>Session History</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {activities.length === 0 && (
-            <p className="text-muted-foreground">No sessions recorded yet.</p>
-          )}
-          {activities
-            .slice()
-            .reverse()
-            .map((activity) => (
-              <div key={activity.date} className="flex justify-between items-center">
-                <div>
-                  <p className="font-semibold">{getProjectName(activity.projectId)}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(activity.date).toLocaleString()}
-                  </p>
-                </div>
-                <p className="font-mono">{formatTime(activity.time)}</p>
-              </div>
-            ))}
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Project</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="text-right">Duration</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {activities.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-muted-foreground">
+                  No sessions recorded yet.
+                </TableCell>
+              </TableRow>
+            )}
+            {activities
+              .slice()
+              .reverse()
+              .map((activity) => (
+                <TableRow key={activity.date}>
+                  <TableCell className="font-medium">{getProjectName(activity.projectId)}</TableCell>
+                  <TableCell>{new Date(activity.date).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-right font-mono">{formatTime(activity.time)}</TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );

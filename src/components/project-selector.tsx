@@ -97,21 +97,6 @@ export function ProjectSelector() {
           </DialogContent>
         </Dialog>
       )}
-      <div className="p-4 border-t">
-        <div className="flex flex-col gap-2">
-          <Input
-            type="text"
-            value={newProjectName}
-            onChange={(e) => setNewProjectName(e.target.value)}
-            placeholder="New project name"
-            className="w-full"
-          />
-          <Button onClick={handleCreateProject} className="w-full">
-            <PlusCircle className="w-4 h-4 mr-2" />
-            Create Project
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }
