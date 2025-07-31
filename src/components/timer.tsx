@@ -2,14 +2,23 @@
 
 import { useStore } from "@/store/use-store";
 import { useEffect, useState } from "react";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export function Timer() {
-  const { addActivity } = useStore();
-  const [time, setTime] = useState(60 * 60);
+  const { addActivity, activeProjectId } = useStore();
+  const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
-  const [duration, setDuration] = useState(60 * 60);
+  const [duration, setDuration] = useState(25 * 60);
+  const [customMinutes, setCustomMinutes] = useState(25);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -18,17 +27,23 @@ export function Timer() {
       interval = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
-    } else if (time === 0) {
-      addActivity({ projectId: "1", time: duration });
+    } else if (time === 0 && isActive) {
+      if (activeProjectId) {
+        addActivity({ projectId: activeProjectId, time: duration });
+      }
       const audio = new Audio("/notification.mp3");
       audio.play();
       setIsActive(false);
     }
 
     return () => clearInterval(interval);
-  }, [isActive, time, addActivity, duration]);
+  }, [isActive, time, addActivity, duration, activeProjectId]);
 
   const toggleTimer = () => {
+    if (!activeProjectId) {
+      alert("Please select a project first.");
+      return;
+    }
     setIsActive(!isActive);
   };
 
@@ -51,27 +66,59 @@ export function Timer() {
     setIsActive(false);
   };
 
+  const handleCustomTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value)) {
+      setCustomMinutes(value);
+      handleSetDuration(value);
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center">
-      <div className="text-7xl font-bold">{formatTime(time)}</div>
-      <div className="mt-4 flex gap-4">
-        <Button onClick={toggleTimer} size="icon" variant="default">
-          {isActive ? <Pause size={24} /> : <Play size={24} />}
+    <div className="flex flex-col items-center justify-center space-y-6">
+      <div className="text-8xl font-bold tracking-tighter">
+        {formatTime(time)}
+      </div>
+      <div className="flex gap-4">
+        <Button onClick={toggleTimer} size="lg" variant="default" className="w-32">
+          {isActive ? <Pause className="mr-2" /> : <Play className="mr-2" />}
+          {isActive ? "Pause" : "Start"}
         </Button>
-        <Button onClick={resetTimer} size="icon" variant="secondary">
-          <RotateCcw size={24} />
+        <Button onClick={resetTimer} size="lg" variant="secondary">
+          <RotateCcw />
         </Button>
       </div>
-      <div className="mt-6 flex justify-center gap-2">
-        <Button onClick={() => handleSetDuration(30)} variant="secondary">
-          30m
+      <div className="flex items-center gap-2">
+        <Button onClick={() => handleSetDuration(15)} variant="outline">
+          15m
         </Button>
-        <Button onClick={() => handleSetDuration(60)} variant="default">
-          1h
+        <Button onClick={() => handleSetDuration(25)} variant="outline">
+          25m
         </Button>
-        <Button onClick={() => handleSetDuration(120)} variant="secondary">
-          2h
+        <Button onClick={() => handleSetDuration(50)} variant="outline">
+          50m
         </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="icon">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Custom Time</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <Input
+                id="custom-time"
+                type="number"
+                value={customMinutes}
+                onChange={handleCustomTimeChange}
+                className="col-span-3"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
