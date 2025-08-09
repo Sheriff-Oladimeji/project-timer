@@ -34,9 +34,38 @@ export function EnhancedTimer() {
   const [time, setTime] = useState(timerState.duration);
   const [customMinutes, setCustomMinutes] = useState(25);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const lastSaveRef = useRef<number>(Date.now());
   const visibilityRef = useRef<boolean>(!document.hidden);
+
+  const handleTimerComplete = useCallback(() => {
+    if (activeProjectId && timerState.startTime) {
+      const totalTime =
+        timerState.elapsedTime +
+        Math.floor((Date.now() - timerState.startTime) / 1000);
+      updateTimerState({
+        isActive: false,
+        isPaused: false,
+        elapsedTime: totalTime,
+      });
+      saveTimerProgress();
+
+      // Play notification sound
+      const audio = new Audio("/notification.mp3");
+      audio.play().catch(() => {
+        // Fallback if audio fails
+        console.log("Timer completed!");
+      });
+    }
+    resetTimer();
+  }, [
+    activeProjectId,
+    timerState.startTime,
+    timerState.elapsedTime,
+    updateTimerState,
+    saveTimerProgress,
+    resetTimer,
+  ]);
 
   // Page Visibility API to handle tab switching
   useEffect(() => {
@@ -122,6 +151,8 @@ export function EnhancedTimer() {
     timerState.startTime,
     timerState.elapsedTime,
     timerState.duration,
+    handleTimerComplete,
+    updateTimerState,
   ]);
 
   // Update document title with timer
@@ -155,35 +186,6 @@ export function EnhancedTimer() {
     timerState.isPaused,
     activeProjectId,
     projects,
-  ]);
-
-  const handleTimerComplete = useCallback(() => {
-    if (activeProjectId && timerState.startTime) {
-      const totalTime =
-        timerState.elapsedTime +
-        Math.floor((Date.now() - timerState.startTime) / 1000);
-      updateTimerState({
-        isActive: false,
-        isPaused: false,
-        elapsedTime: totalTime,
-      });
-      saveTimerProgress();
-
-      // Play notification sound
-      const audio = new Audio("/notification.mp3");
-      audio.play().catch(() => {
-        // Fallback if audio fails
-        console.log("Timer completed!");
-      });
-    }
-    resetTimer();
-  }, [
-    activeProjectId,
-    timerState.startTime,
-    timerState.elapsedTime,
-    updateTimerState,
-    saveTimerProgress,
-    resetTimer,
   ]);
 
   const toggleTimer = () => {
