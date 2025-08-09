@@ -36,7 +36,7 @@ export function EnhancedTimer() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const lastSaveRef = useRef<number>(Date.now());
-  const visibilityRef = useRef<boolean>(!document.hidden);
+  const visibilityRef = useRef<boolean>(false);
 
   const handleTimerComplete = useCallback(() => {
     if (activeProjectId && timerState.startTime) {
@@ -70,7 +70,7 @@ export function EnhancedTimer() {
   // Page Visibility API to handle tab switching
   useEffect(() => {
     const handleVisibilityChange = () => {
-      const isVisible = !document.hidden;
+      const isVisible = typeof document !== "undefined" && !document.hidden;
       const wasVisible = visibilityRef.current;
       visibilityRef.current = isVisible;
 
@@ -94,9 +94,17 @@ export function EnhancedTimer() {
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+    return () => {
+      if (typeof document !== "undefined") {
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange
+        );
+      }
+    };
   }, [
     timerState.isActive,
     timerState.startTime,
@@ -166,19 +174,23 @@ export function EnhancedTimer() {
     };
 
     const baseTitle = "Project Timer";
-    if (timerState.isActive && activeProjectId) {
-      const project = projects.find((p) => p.id === activeProjectId);
-      const projectName = project?.name || "Unknown Project";
-      const status = timerState.isPaused ? " (Paused)" : "";
-      document.title = `${formatTime(
-        time
-      )} - ${projectName}${status} | ${baseTitle}`;
-    } else {
-      document.title = baseTitle;
+    if (typeof document !== "undefined") {
+      if (timerState.isActive && activeProjectId) {
+        const project = projects.find((p) => p.id === activeProjectId);
+        const projectName = project?.name || "Unknown Project";
+        const status = timerState.isPaused ? " (Paused)" : "";
+        document.title = `${formatTime(
+          time
+        )} - ${projectName}${status} | ${baseTitle}`;
+      } else {
+        document.title = baseTitle;
+      }
     }
 
     return () => {
-      document.title = baseTitle;
+      if (typeof document !== "undefined") {
+        document.title = baseTitle;
+      }
     };
   }, [
     time,
