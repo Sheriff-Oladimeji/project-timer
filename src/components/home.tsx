@@ -72,31 +72,34 @@ export function Home() {
         </div>
       </header>
 
-      <main className="flex flex-col gap-6 p-4 md:gap-8 md:p-8 max-w-6xl mx-auto w-full">
-        {/* Timer Section */}
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-center">Project Timer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EnhancedTimer />
-          </CardContent>
-        </Card>
-
-        {/* Session History and Activity Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="order-2 md:order-1">
-            <SessionHistory />
-          </div>
-          <Card className="order-1 md:order-2">
+      <main className="flex flex-col gap-6 p-4 md:gap-8 md:p-8 max-w-7xl mx-auto w-full">
+        {/* Timer and Session History Side by Side */}
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-5">
+          {/* Timer Section - Takes 60% width on desktop */}
+          <Card className="lg:col-span-3">
             <CardHeader>
-              <CardTitle>Activity Overview</CardTitle>
+              <CardTitle className="text-center">Project Timer</CardTitle>
             </CardHeader>
             <CardContent>
-              <ActivityGrid />
+              <EnhancedTimer />
             </CardContent>
           </Card>
+
+          {/* Session History - Takes 40% width on desktop */}
+          <div className="lg:col-span-2">
+            <SessionHistory />
+          </div>
         </div>
+
+        {/* Activity Grid - Full width section */}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Activity Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ActivityGrid />
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
