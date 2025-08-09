@@ -67,10 +67,20 @@ export function Timer() {
   };
 
   const handleCustomTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value)) {
-      setCustomMinutes(value);
-      handleSetDuration(value);
+    const value = e.target.value;
+    if (value === "") {
+      setCustomMinutes(0);
+      return;
+    }
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setCustomMinutes(numValue);
+    }
+  };
+
+  const handleCustomTimeSubmit = () => {
+    if (customMinutes > 0) {
+      handleSetDuration(customMinutes);
     }
   };
 
@@ -80,7 +90,12 @@ export function Timer() {
         {formatTime(time)}
       </div>
       <div className="flex gap-4">
-        <Button onClick={toggleTimer} size="lg" variant="default" className="w-32">
+        <Button
+          onClick={toggleTimer}
+          size="lg"
+          variant="default"
+          className="w-32"
+        >
           {isActive ? <Pause className="mr-2" /> : <Play className="mr-2" />}
           {isActive ? "Pause" : "Start"}
         </Button>
@@ -112,10 +127,13 @@ export function Timer() {
               <Input
                 id="custom-time"
                 type="number"
-                value={customMinutes}
+                value={customMinutes || ""}
                 onChange={handleCustomTimeChange}
+                placeholder="Enter minutes"
                 className="col-span-3"
+                min="0"
               />
+              <Button onClick={handleCustomTimeSubmit}>Set Timer</Button>
             </div>
           </DialogContent>
         </Dialog>
